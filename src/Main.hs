@@ -4,6 +4,7 @@ import Control.Applicative
 import System.Directory(getCurrentDirectory, getDirectoryContents)
 import System.IO()
 import Text.XML.Light
+import Debug.Trace
 
 type Word = String
 type Sentence = [Word]
@@ -30,6 +31,7 @@ addNumbers x y = x + y
 -- vorVier [] = [0]
 -- vorVier (x:xs) = filter (<4)
 
+-- | read dir
 readDir :: String -> IO [FilePath]
 readDir path = do
   directory <- getCurrentDirectory
@@ -37,12 +39,16 @@ readDir path = do
 
 parseXml :: String -> [Sentence]
 parseXml source = 
-      -- symbols  = concatMap (FindElements $ simpleName "tok") (sentences)
   let contents = parseXML source
-      sentences = concatMap (findElements $ simpleName "sentence") (onlyElems contents)
+      sentenceValues = concatMap (findElements $ simpleName "sentence") (onlyElems contents)
+      sentences = map (findElements $ simpleName "tok") sentenceValues
+      nestedWords = map (map strContent) sentences
       simpleName s = QName s Nothing Nothing
   in
-    [["hallo"]]
+    nestedWords
+
+calculatePerplexity :: Sentence -> Double
+calculatePerplexity sentence = 0.9
 
 main :: IO ()
 main = do
@@ -52,6 +58,6 @@ main = do
   print filePaths
   contents <- mapM readFile filePaths
   let sentences = map parseXml contents
-  -- print sentences
+  print sentences
   putStrLn "hello"
 
