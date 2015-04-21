@@ -1,10 +1,23 @@
 module Main where
-import Text.XML.Light()
+
+import Control.Applicative
+import System.Directory(getCurrentDirectory, getDirectoryContents)
+import System.IO()
+import Text.XML.Light
+
+type Word = String
+type Sentence = [Word]
 
 -- import Network.HTTP
 
+corpusPath :: FilePath
+corpusPath = "corpus/"
+
 jsonURL :: String
 jsonURL = "http://daniel-diaz.github.io/misc/pizza.json"
+
+isRegularFile :: FilePath -> Bool
+isRegularFile f = f /= "." && f /= ".."
 
 -- 1. Perform a basic HTTP get request and return the body
 -- getContent :: String -> IO String
@@ -17,19 +30,28 @@ addNumbers x y = x + y
 -- vorVier [] = [0]
 -- vorVier (x:xs) = filter (<4)
 
-readDir :: String -> String
-readDir _ = "asdf"
--- getDirectoryContents -> readFile
---
+readDir :: String -> IO [FilePath]
+readDir path = do
+  directory <- getCurrentDirectory
+  filter isRegularFile <$> getDirectoryContents (directory ++ "/" ++ path)
 
-parseXml :: String -> String
-parseXml _ = "asdf"
--- let contents = parseXML source
---     quotes   = concatMap (findElements $ simpleName "StockQuote") (onlyElems contents)
---     symbols  = map (findAttr $ simpleName "Symbol") quotes
---     simpleName s = QName s Nothing Nothing
--- print symbols
+parseXml :: String -> [Sentence]
+parseXml source = 
+      -- symbols  = concatMap (FindElements $ simpleName "tok") (sentences)
+  let contents = parseXML source
+      sentences = concatMap (findElements $ simpleName "sentence") (onlyElems contents)
+      simpleName s = QName s Nothing Nothing
+  in
+    [["hallo"]]
 
 main :: IO ()
-main = putStrLn "hello"
+main = do
+  files <- readDir corpusPath
+  print files
+  let filePaths = map (corpusPath++) files
+  print filePaths
+  contents <- mapM readFile filePaths
+  let sentences = map parseXml contents
+  -- print sentences
+  putStrLn "hello"
 
