@@ -1,4 +1,4 @@
-# Perplexity-Calculator
+# Perplexity calculator
 Tool calculating the perplexity of a laguage model.
 
-# Installation
+## Installation
