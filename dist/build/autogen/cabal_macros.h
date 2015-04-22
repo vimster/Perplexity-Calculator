@@ -7,12 +7,26 @@
   (major1) == 4 && (major2) <  7 || \
   (major1) == 4 && (major2) == 7 && (minor) <= 0)
 
+/* package containers-0.5.5.1 */
+#define VERSION_containers "0.5.5.1"
+#define MIN_VERSION_containers(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  5 || \
+  (major1) == 0 && (major2) == 5 && (minor) <= 5)
+
 /* package directory-1.2.1.0 */
 #define VERSION_directory "1.2.1.0"
 #define MIN_VERSION_directory(major1,major2,minor) (\
   (major1) <  1 || \
   (major1) == 1 && (major2) <  2 || \
   (major1) == 1 && (major2) == 2 && (minor) <= 1)
+
+/* package random-1.0.1.1 */
+#define VERSION_random "1.0.1.1"
+#define MIN_VERSION_random(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  0 || \
+  (major1) == 1 && (major2) == 0 && (minor) <= 1)
 
 /* package xml-1.3.14 */
 #define VERSION_xml "1.3.14"
