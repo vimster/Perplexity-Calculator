@@ -37,7 +37,7 @@ parseXml source =
       nestedWords = map (map strContent) sentences
       simpleName s = QName s Nothing Nothing
   in
-    nestedWords
+    map ("<s>":) nestedWords
 
 buildFrequencies :: [Sentence] -> Frequencies
 buildFrequencies sentences =
@@ -46,19 +46,18 @@ buildFrequencies sentences =
 buildFrequency :: Sentence -> Frequencies
 buildFrequency sentence =
   let
-    list = "<s>" : sentence
-    pairs = zip list $ tail list
+    pairs = zip sentence $ tail sentence
+    unigramFrequencies = foldl (\ f x -> Map.insertWith (+) (x, "_") 1 f) Map.empty sentence
     bigramFrequencies = foldl (\ f x -> Map.insertWith (+) x 1 f) Map.empty pairs
-    unigramFrequencies = foldl (\ f x -> Map.insertWith (+) ("_", x) 1 f) Map.empty sentence
   in
     Map.unionWith (+) bigramFrequencies unigramFrequencies
-  
 
--- lookupFrequency :: Frequencies -> Word -> Word -> Integer
--- lookupFrequency frequencies w1 w2 = 
+lookupFrequency :: Frequencies -> Word -> Word -> Integer
+lookupFrequency frequencies w1 w2 = 
+  Map.findWithDefault 0 (w1, w2) frequencies + 1
 
-calculatePerplexity :: Sentence -> Double
-calculatePerplexity sentence = 0.9
+calculatePerplexity :: Sentence -> frequencies -> Double
+calculatePerplexity sentence frequencies = 0.9
 
 main :: IO ()
 main = do
@@ -66,7 +65,8 @@ main = do
   gen <- newStdGen
   let filePaths = map (corpusPath++) files
   contents <- mapM readFile filePaths
-  let sentences = map parseXml contents
-  print sentences
+  let sentences = concatMap parseXml contents
+  let frequencies = buildFrequencies sentences
+  print frequencies
   putStrLn "hello"
 
