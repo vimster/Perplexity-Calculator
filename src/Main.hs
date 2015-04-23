@@ -59,9 +59,13 @@ lookupFrequency :: Frequencies -> Bigram -> Integer
 lookupFrequency frequencies bigram = 
   Map.findWithDefault 0 bigram frequencies + 1
 
-calculatePerplexity :: frequencies -> Sentence -> Double
-calculatePerplexity frequencies sentence = 0.9
-  -- map (\bigram -> lookupFrequency frequencies) bigrams sentence
+calculatePerplexity :: Fractional f => frequencies -> Sentence -> f
+calculatePerplexity frequencies sentence =
+  let
+    b1 bigram = fromInteger $ lookupFrequency frequencies bigram
+    calc bigram@(w1, w2) = b1 bigram / b1 (w2, "_")
+  in
+    foldl (*) 1.0 $ map calc $ bigrams sentence
   
 
 split :: [a] -> ([a], [a]) 
