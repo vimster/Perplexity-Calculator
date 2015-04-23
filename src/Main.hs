@@ -1,6 +1,6 @@
 module Main where
 
-import System.Random
+import System.Random(newStdGen)
 import Control.Applicative
 import System.Directory(getCurrentDirectory, getDirectoryContents)
 import System.IO()
@@ -11,6 +11,7 @@ import qualified Data.List as List
 
 type Word = String
 type Sentence = [Word]
+type Bigram = (Word, Word)
 type Frequencies = Map.Map (Word, Word) Integer
 
 testSentence = ["Ein", "Haus", "im", "Wald"]
@@ -43,21 +44,30 @@ buildFrequencies :: [Sentence] -> Frequencies
 buildFrequencies sentences =
   foldl (Map.unionWith (+)) Map.empty $ map buildFrequency sentences
 
+bigrams :: Sentence -> [(Word, Word)]
+bigrams sentence = zip sentence $ tail sentence
+
 buildFrequency :: Sentence -> Frequencies
 buildFrequency sentence =
   let
-    pairs = zip sentence $ tail sentence
     unigramFrequencies = foldl (\ f x -> Map.insertWith (+) (x, "_") 1 f) Map.empty sentence
-    bigramFrequencies = foldl (\ f x -> Map.insertWith (+) x 1 f) Map.empty pairs
+    bigramFrequencies = foldl (\ f x -> Map.insertWith (+) x 1 f) Map.empty $ bigrams sentence
   in
     Map.unionWith (+) bigramFrequencies unigramFrequencies
 
-lookupFrequency :: Frequencies -> Word -> Word -> Integer
-lookupFrequency frequencies w1 w2 = 
-  Map.findWithDefault 0 (w1, w2) frequencies + 1
+lookupFrequency :: Frequencies -> Bigram -> Integer
+lookupFrequency frequencies bigram = 
+  Map.findWithDefault 0 bigram frequencies + 1
 
-calculatePerplexity :: Sentence -> frequencies -> Double
-calculatePerplexity sentence frequencies = 0.9
+calculatePerplexity :: frequencies -> Sentence -> Double
+calculatePerplexity frequencies sentence = 0.9
+  -- map (\bigram -> lookupFrequency frequencies) bigrams sentence
+  
+
+split :: [a] -> ([a], [a]) 
+split x = (take modelSize x, drop modelSize x) 
+   where len = fromIntegral $ length x 
+         modelSize = truncate $ len * 0.9 
 
 main :: IO ()
 main = do
@@ -65,8 +75,12 @@ main = do
   gen <- newStdGen
   let filePaths = map (corpusPath++) files
   contents <- mapM readFile filePaths
-  let sentences = concatMap parseXml contents
-  let frequencies = buildFrequencies sentences
-  print frequencies
+  let (model, test) = split contents
+      modelSentences = concatMap parseXml model
+      testSentences = concatMap parseXml test
+      frequencies = buildFrequencies modelSentences
+      perplexities = map (calculatePerplexity frequencies) testSentences
+  print perplexities
+  
   putStrLn "hello"
 
