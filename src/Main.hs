@@ -18,6 +18,9 @@ testSentence = ["Ein", "Haus", "im", "Wald"]
 testSentence1 = ["Alles", "Klar", "Ein", "Haus"]
 testSentences = [testSentence, testSentence1]
 
+
+-- IO START ----------------------------------------------------------
+--
 corpusPath :: FilePath
 corpusPath = "corpus/"
 
@@ -40,12 +43,14 @@ parseXml source =
   in
     map ("<s>":) nestedWords
 
-buildFrequencies :: [Sentence] -> Frequencies
-buildFrequencies sentences =
-  foldl (Map.unionWith (+)) Map.empty $ map buildFrequency sentences
+-- IO END ----------------------------------------------------------
+
 
 bigrams :: Sentence -> [(Word, Word)]
 bigrams sentence = zip sentence $ tail sentence
+
+buildFrequencies :: [Sentence] -> Frequencies
+buildFrequencies = foldl (Map.unionWith (+)) Map.empty . map buildFrequency
 
 buildFrequency :: Sentence -> Frequencies
 buildFrequency sentence =
@@ -59,11 +64,11 @@ lookupFrequency :: Frequencies -> Bigram -> Integer
 lookupFrequency frequencies bigram = 
   Map.findWithDefault 0 bigram frequencies + 1
 
-calculatePerplexity :: Fractional f => frequencies -> Sentence -> f
+calculatePerplexity :: Fractional frac => Frequencies -> Sentence -> frac
 calculatePerplexity frequencies sentence =
   let
-    b1 bigram = fromInteger $ lookupFrequency frequencies bigram
-    calc bigram@(w1, w2) = b1 bigram / b1 (w2, "_")
+    probability = fromInteger . lookupFrequency frequencies 
+    calc bigram@(_, w2) = probability bigram / probability (w2, "_")
   in
     foldl (*) 1.0 $ map calc $ bigrams sentence
   
