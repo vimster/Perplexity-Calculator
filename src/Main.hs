@@ -7,16 +7,21 @@ import System.IO()
 import Text.XML.Light
 import qualified Data.Map as Map
 import qualified Data.List as List
-import Debug.Trace
+-- import Debug.Trace
 
 type Word = String
 type Sentence = [Word]
 type Bigram = (Word, Word)
 type Frequencies = Map.Map (Word, Word) Integer
 
+testSentence :: Sentence
 testSentence = ["Ein", "Haus", "im", "Wald"]
+testSentence1 :: Sentence
 testSentence1 = ["Alles", "Klar", "Ein", "Haus"]
+testSentences :: [Sentence]
 testSentences = [testSentence, testSentence1]
+testFrequencies :: Frequencies
+testFrequencies = Map.fromList [(("a", "a"), 0),(("b", "b"), 2), (("c", "c"), 1)]
 
 
 -- IO START ----------------------------------------------------------
@@ -49,11 +54,11 @@ parseXml source =
 bigrams :: Sentence -> [(Word, Word)]
 bigrams sentence = zip sentence $ tail sentence
 
-buildFrequencies :: [Sentence] -> Frequencies
-buildFrequencies = foldl (Map.unionWith (+)) Map.empty . map buildFrequency
+frequencPerCorups :: [Sentence] -> Frequencies
+frequencPerCorups = foldl (Map.unionWith (+)) Map.empty . map frequenciesPerSentence
 
-buildFrequency :: Sentence -> Frequencies
-buildFrequency sentence =
+frequenciesPerSentence :: Sentence -> Frequencies
+frequenciesPerSentence sentence =
   let
     unigramFrequencies = foldl (\ f x -> Map.insertWith (+) (x, "_") 1 f) Map.empty sentence
     bigramFrequencies = foldl (\ f x -> Map.insertWith (+) x 1 f) Map.empty $ bigrams sentence
@@ -62,17 +67,17 @@ buildFrequency sentence =
 
 lookupFrequency :: Frequencies -> Bigram -> Integer
 lookupFrequency frequencies bigram = 
-  Map.findWithDefault 1 bigram frequencies + 1
+  Map.findWithDefault 0 bigram frequencies + 1
 
-calculatePerplexity :: Frequencies -> Sentence -> Float
+calculatePerplexity :: Frequencies -> Sentence -> Double
 calculatePerplexity frequencies sentence =
   let
     probability = fromInteger . lookupFrequency frequencies 
     calc bigram@(_, w2) = probability bigram / probability (w2, "_")
-    p = foldl (*) 1.0 $ map calc $ bigrams sentence
+    p = product $ map calc $ bigrams sentence
     size = fromIntegral $ length sentence - 1
   in
-    traceShow (p, size) $ p ** (-1/size)
+    p ** (-1/size)
   
 
 split :: [a] -> ([a], [a]) 
@@ -88,9 +93,9 @@ main = do
   contents <- mapM readFile filePaths
   let (model, test) = split contents
       modelSentences = concatMap parseXml model
-      testSentences = concatMap parseXml test
-      frequencies = buildFrequencies modelSentences
-      perplexities = map (calculatePerplexity frequencies) testSentences
+      testModelSentences = concatMap parseXml test
+      frequencies = frequencPerCorups modelSentences
+      perplexities = map (calculatePerplexity frequencies) testModelSentences
   print perplexities
   
   putStrLn "hello"
