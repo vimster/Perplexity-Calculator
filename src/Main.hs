@@ -7,7 +7,7 @@ import System.IO()
 import Text.XML.Light
 import qualified Data.Map as Map
 import qualified Data.List as List
--- import Debug.Trace
+import Debug.Trace
 
 type Word = String
 type Sentence = [Word]
@@ -62,15 +62,17 @@ buildFrequency sentence =
 
 lookupFrequency :: Frequencies -> Bigram -> Integer
 lookupFrequency frequencies bigram = 
-  Map.findWithDefault 0 bigram frequencies + 1
+  Map.findWithDefault 1 bigram frequencies + 1
 
-calculatePerplexity :: Fractional frac => Frequencies -> Sentence -> frac
+calculatePerplexity :: Frequencies -> Sentence -> Float
 calculatePerplexity frequencies sentence =
   let
     probability = fromInteger . lookupFrequency frequencies 
     calc bigram@(_, w2) = probability bigram / probability (w2, "_")
+    p = foldl (*) 1.0 $ map calc $ bigrams sentence
+    size = fromIntegral $ length sentence - 1
   in
-    foldl (*) 1.0 $ map calc $ bigrams sentence
+    traceShow (p, size) $ p ** (-1/size)
   
 
 split :: [a] -> ([a], [a]) 
