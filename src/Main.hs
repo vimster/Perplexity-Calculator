@@ -1,19 +1,34 @@
 module Main where
 
-import System.Random(newStdGen)
-import Control.Applicative
-import System.Directory(getCurrentDirectory, getDirectoryContents)
-import System.IO()
-import Text.XML.Light
-import qualified Data.Map as Map
-import qualified Data.List as List
+import           Control.Applicative
+import qualified Data.List           as List
+import qualified Data.Map            as Map
+import           System.Directory    (getCurrentDirectory, getDirectoryContents)
+import           System.IO           ()
+import           System.Random       (newStdGen)
+import           Text.XML.Light
 -- import Debug.Trace
+--
 
+------------------------------------------------------------------------
+--  Constants
+------------------------------------------------------------------------
+modelTestRatio :: Double
+modelTestRatio = 0.9
+
+
+------------------------------------------------------------------------
+--  types
+------------------------------------------------------------------------
 type Word = String
 type Sentence = [Word]
 type Bigram = (Word, Word)
 type Frequencies = Map.Map (Word, Word) Integer
 
+
+------------------------------------------------------------------------
+--  test data
+------------------------------------------------------------------------
 testSentence :: Sentence
 testSentence = ["Ein", "Haus", "im", "Wald"]
 testSentence1 :: Sentence
@@ -24,8 +39,9 @@ testFrequencies :: Frequencies
 testFrequencies = Map.fromList [(("a", "a"), 0),(("b", "b"), 2), (("c", "c"), 1)]
 
 
--- IO START ----------------------------------------------------------
---
+------------------------------------------------------------------------
+--  IO
+------------------------------------------------------------------------
 corpusPath :: FilePath
 corpusPath = "corpus/"
 
@@ -39,7 +55,7 @@ readDir path = do
   filter isRegularFile <$> getDirectoryContents (directory ++ "/" ++ path)
 
 parseXml :: String -> [Sentence]
-parseXml source = 
+parseXml source =
   let contents = parseXML source
       sentenceValues = concatMap (findElements $ simpleName "sentence") (onlyElems contents)
       sentences = map (findElements $ simpleName "tok") sentenceValues
@@ -48,8 +64,10 @@ parseXml source =
   in
     map ("<s>":) nestedWords
 
--- IO END ----------------------------------------------------------
 
+------------------------------------------------------------------------
+--  perplexity calculation
+------------------------------------------------------------------------
 
 bigrams :: Sentence -> [(Word, Word)]
 bigrams sentence = zip sentence $ tail sentence
@@ -66,25 +84,29 @@ frequenciesPerSentence sentence =
     Map.unionWith (+) bigramFrequencies unigramFrequencies
 
 lookupFrequency :: Frequencies -> Bigram -> Integer
-lookupFrequency frequencies bigram = 
+lookupFrequency frequencies bigram =
   Map.findWithDefault 0 bigram frequencies + 1
 
-calculatePerplexity :: Frequencies -> Sentence -> Double
-calculatePerplexity frequencies sentence =
+perplexity :: Frequencies -> Sentence -> Double
+perplexity frequencies sentence =
   let
-    probability = fromInteger . lookupFrequency frequencies 
+    probability = fromInteger . lookupFrequency frequencies
     calc bigram@(_, w2) = probability bigram / probability (w2, "_")
     p = product $ map calc $ bigrams sentence
     size = fromIntegral $ length sentence - 1
   in
     p ** (-1/size)
-  
 
-split :: [a] -> ([a], [a]) 
-split x = (take modelSize x, drop modelSize x) 
-   where len = fromIntegral $ length x 
-         modelSize = truncate $ len * 0.9 
 
+split :: [a] -> ([a], [a])
+split x = (take modelSize x, drop modelSize x)
+   where len = fromIntegral $ length x
+         modelSize = truncate $ len * modelTestRatio
+
+
+------------------------------------------------------------------------
+--  main
+------------------------------------------------------------------------
 main :: IO ()
 main = do
   files <- readDir corpusPath
@@ -95,8 +117,8 @@ main = do
       modelSentences = concatMap parseXml model
       testModelSentences = concatMap parseXml test
       frequencies = frequencPerCorups modelSentences
-      perplexities = map (calculatePerplexity frequencies) testModelSentences
+      perplexities = map (perplexity frequencies) testModelSentences
   print perplexities
-  
+
   putStrLn "hello"
 
