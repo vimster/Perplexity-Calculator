@@ -28,12 +28,12 @@
   (major1) == 1 && (major2) <  0 || \
   (major1) == 1 && (major2) == 0 && (minor) <= 1)
 
-/* package random-extras-0.19 */
-#define VERSION_random_extras "0.19"
-#define MIN_VERSION_random_extras(major1,major2,minor) (\
+/* package random-shuffle-0.0.4 */
+#define VERSION_random_shuffle "0.0.4"
+#define MIN_VERSION_random_shuffle(major1,major2,minor) (\
   (major1) <  0 || \
-  (major1) == 0 && (major2) <  19 || \
-  (major1) == 0 && (major2) == 19 && (minor) <= 0)
+  (major1) == 0 && (major2) <  0 || \
+  (major1) == 0 && (major2) == 0 && (minor) <= 4)
 
 /* package xml-1.3.14 */
 #define VERSION_xml "1.3.14"

@@ -1,12 +1,13 @@
 module Main where
 
 import           Control.Applicative
-import qualified Data.List           as List
-import qualified Data.Map            as Map
-import           Data.Random.Extras
-import           System.Directory    (getCurrentDirectory, getDirectoryContents)
-import           System.IO           ()
-import           System.Random       (newStdGen)
+import qualified Data.List             as List ()
+import qualified Data.Map              as Map
+import           System.Directory      (getCurrentDirectory,
+                                        getDirectoryContents)
+import           System.IO             ()
+import           System.Random         (newStdGen)
+import qualified System.Random.Shuffle as Shuffler
 import           Text.XML.Light
 -- import Debug.Trace
 --
@@ -104,6 +105,11 @@ split x = (take modelSize x, drop modelSize x)
    where len = fromIntegral $ length x
          modelSize = truncate $ len * modelTestRatio
 
+shuffle :: [a] -> IO [a]
+shuffle list = do
+  gen <- newStdGen
+  return $ Shuffler.shuffle' list (length list) gen
+
 
 ------------------------------------------------------------------------
 --  main
@@ -111,15 +117,17 @@ split x = (take modelSize x, drop modelSize x)
 main :: IO ()
 main = do
   files <- readDir corpusPath
-  gen <- newStdGen
-  let filePaths = map (corpusPath++) files
+  filePaths <- shuffle $ map (corpusPath++) files
+  putStrLn "Reading files ---------------------------------"
   contents <- mapM readFile filePaths
+  putStrLn "Calculating   ---------------------------------"
   let (model, test) = split contents
       modelSentences = concatMap parseXml model
       testModelSentences = concatMap parseXml test
       frequencies = frequencPerCorups modelSentences
       perplexities = map (perplexity frequencies) testModelSentences
-  print perplexities
+  -- print perplexities
+  putStr "Average perplexity: "
+  print $ (sum perplexities) / (fromIntegral $ length perplexities)
 
-  putStrLn "hello"
 

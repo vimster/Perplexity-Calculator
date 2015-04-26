@@ -25,7 +25,7 @@ executable perplexity-calculator
   build-depends:       base >=4.7 && <4.8,
                        directory,
                        containers,
+                       random-shuffle,
                        random,
-                       random-extras,
                        xml
 
