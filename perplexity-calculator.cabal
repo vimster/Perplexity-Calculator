@@ -26,5 +26,6 @@ executable perplexity-calculator
                        directory,
                        containers,
                        random,
+                       random-extras,
                        xml
 

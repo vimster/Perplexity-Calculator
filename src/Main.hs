@@ -3,6 +3,7 @@ module Main where
 import           Control.Applicative
 import qualified Data.List           as List
 import qualified Data.Map            as Map
+import           Data.Random.Extras
 import           System.Directory    (getCurrentDirectory, getDirectoryContents)
 import           System.IO           ()
 import           System.Random       (newStdGen)
