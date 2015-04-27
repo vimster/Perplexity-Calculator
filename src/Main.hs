@@ -5,10 +5,12 @@ import qualified Data.List             as List ()
 import qualified Data.Map              as Map
 import           System.Directory      (getCurrentDirectory,
                                         getDirectoryContents)
+import           System.Environment
 import           System.IO             ()
 import           System.Random         (newStdGen)
 import qualified System.Random.Shuffle as Shuffler
 import           Text.XML.Light
+
 -- import Debug.Trace
 --
 
@@ -44,8 +46,8 @@ testFrequencies = Map.fromList [(("a", "a"), 0),(("b", "b"), 2), (("c", "c"), 1)
 ------------------------------------------------------------------------
 --  IO
 ------------------------------------------------------------------------
-corpusPath :: FilePath
-corpusPath = "corpus/"
+-- corpusPath :: FilePath
+-- corpusPath = "corpus/"
 
 isRegularFile :: FilePath -> Bool
 isRegularFile f = f /= "." && f /= ".."
@@ -116,18 +118,20 @@ shuffle list = do
 ------------------------------------------------------------------------
 main :: IO ()
 main = do
+  args <- getArgs
+  let corpusPath = (head args) ++ "/"
   files <- readDir corpusPath
   filePaths <- shuffle $ map (corpusPath++) files
-  putStrLn "Reading files ---------------------------------"
+  putStrLn "Reading files..."
   contents <- mapM readFile filePaths
-  putStrLn "Calculating   ---------------------------------"
+  putStrLn "Calculating..."
   let (model, test) = split contents
       modelSentences = concatMap parseXml model
       testModelSentences = concatMap parseXml test
       frequencies = frequencPerCorups modelSentences
       perplexities = map (perplexity frequencies) testModelSentences
   -- print perplexities
-  putStr "Average perplexity: "
+  putStr "Perplexity: "
   print $ (sum perplexities) / (fromIntegral $ length perplexities)
 
 

@@ -1,4 +1,6 @@
 # Perplexity calculator
 Tool calculating the perplexity of a laguage model.
 
-## Installation
+## Usage
+$ cabal install
+$ cabal run folder
