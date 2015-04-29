@@ -21,6 +21,13 @@
   (major1) == 1 && (major2) <  2 || \
   (major1) == 1 && (major2) == 2 && (minor) <= 1)
 
+/* package filepath-1.3.0.2 */
+#define VERSION_filepath "1.3.0.2"
+#define MIN_VERSION_filepath(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  3 || \
+  (major1) == 1 && (major2) == 3 && (minor) <= 0)
+
 /* package random-1.0.1.1 */
 #define VERSION_random "1.0.1.1"
 #define MIN_VERSION_random(major1,major2,minor) (\

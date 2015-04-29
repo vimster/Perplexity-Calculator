@@ -2,5 +2,9 @@
 Tool calculating the perplexity of a laguage model.
 
 ## Usage
+$ cabal update
 $ cabal install
-$ cabal run folder
+$ cabal run CORPUSFOLDER
+
+## Results
+Perplexity = ~ 44.31
