@@ -77,8 +77,8 @@ parseXml source =
 bigrams :: Sentence -> [(Word, Word)]
 bigrams sentence = zip sentence $ tail sentence
 
-frequencPerCorups :: [Sentence] -> Frequencies
-frequencPerCorups = foldl (Map.unionWith (+)) Map.empty . map frequenciesPerSentence
+frequencePerCorups :: [Sentence] -> Frequencies
+frequencePerCorups = foldl (Map.unionWith (+)) Map.empty . map frequenciesPerSentence
 
 frequenciesPerSentence :: Sentence -> Frequencies
 frequenciesPerSentence sentence =
@@ -128,9 +128,8 @@ main = do
   let (model, test) = split contents
       modelSentences = concatMap parseXml model
       testModelSentences = concatMap parseXml test
-      frequencies = frequencPerCorups modelSentences
+      frequencies = frequencePerCorups modelSentences
       perplexities = map (perplexity frequencies) testModelSentences
-  -- print perplexities
   putStr "Perplexity: "
   print $ sum perplexities / (fromIntegral $ length perplexities)
 
