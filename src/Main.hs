@@ -103,8 +103,8 @@ perplexity frequencies sentence =
     p ** (-1/size)
 
 
-split :: [a] -> ([a], [a])
-split x = (take modelSize x, drop modelSize x)
+splitIntoModelAndTest :: [a] -> ([a], [a])
+splitIntoModelAndTest x = (take modelSize x, drop modelSize x)
    where len = fromIntegral $ length x
          modelSize = truncate $ len * modelTestRatio
 
@@ -119,13 +119,12 @@ shuffle list = do
 ------------------------------------------------------------------------
 main :: IO ()
 main = do
-  args <- getArgs
-  let corpusPath = head args ++ "/"
+  let corpusPath = "corpus/"
   files <- readDir corpusPath
   filePaths <- shuffle $ map (corpusPath++) files
   contents <- mapM readFile filePaths
   putStrLn "Calculating..."
-  let (model, test) = split contents
+  let (model, test) = splitIntoModelAndTest contents
       modelSentences = concatMap parseXml model
       testModelSentences = concatMap parseXml test
       frequencies = frequencePerCorups modelSentences
